@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>WAP - Whatsapp Privacy Toggler</title>
+    <style>
+      :root {
+        --wa-green: #25D366;
+        --wa-green-dark: #128C7E;
+        --wa-bg: #F0F2F5;
+        --wa-border: #D1D7DB;
+        --text: #111B21;
+        --muted: #667781;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 10px;
+        width: 320px;
+        color: var(--text);
+        background: #fff;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--wa-border);
+      }
+      .disclaimer {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .version {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .buttons {
+        display: flex;
+        gap: 8px;
+        margin: 8px 0 6px 0;
+      }
+      .btn {
+        appearance: none;
+        border: none;
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color .15s ease, box-shadow .15s ease, transform .02s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      }
+      .btn:active { transform: translateY(1px) }
+      .btn-primary {
+        background: var(--wa-green);
+        color: #fff;
+      }
+      .btn-primary:hover { background: var(--wa-green-dark) }
+      .btn-secondary {
+        background: #E9EEF2;
+        color: #0B141A;
+      }
+      .btn-danger {
+        background: #EF4444;
+        color: #fff;
+      }
+      .btn-danger:hover { background: #DC2626 }
+      .row { display:flex; align-items:center; gap:8px; margin-top:8px }
+      label { flex:0 0 64px; font-size: 12px; color: var(--muted) }
+      input[type="number"] {
+        flex:1;
+        background: #fff;
+        border: 1px solid var(--wa-border);
+        border-radius: 14px;
+        padding: 8px 10px;
+        font-size: 14px;
+        color: var(--text);
+      }
+      #offsetView { font-size:12px; color: var(--muted) }
+      #status {
+        white-space: pre-wrap;
+        font-size: 12px;
+        margin-top: 10px;
+        min-height: 60px;
+        max-height: 160px;
+        overflow: auto;
+        border: 1px solid var(--wa-border);
+        background: var(--wa-bg);
+        padding: 8px;
+        width: 100%;
+        border-radius: 12px;
+      }
+      .footer {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid var(--wa-border);
+        font-size: 11px;
+        color: var(--muted);
+        text-align: center;
+      }
+      /* Modal */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        display: none;
+      }
+      .modal-backdrop[aria-hidden="false"] { display: block }
+      .modal-card {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 280px;
+        max-width: calc(100% - 24px);
+        background: #fff;
+        border: 1px solid var(--wa-border);
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        padding: 10px;
+        display: none;
+      }
+      .modal-card[aria-hidden="false"] { display: block }
+      .modal-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+        font-size: 14px;
+      }
+      .modal-body { font-size: 12px; color: var(--text); max-height: 40vh; overflow: auto; }
+      .modal-actions { display:flex; justify-content:flex-end; margin-top:8px }
+      .btn-link { background: transparent; color: var(--wa-green-dark); padding: 6px 8px; border-radius: 8px }
+      .btn-link:hover { background: #EEF3F6 }
+      * { box-sizing: border-box }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="disclaimer">Use at your own discretion</div>
+      <div class="version">v<span id="version">1.0.1</span></div>
+    </div>
+    <div class="buttons">
+      <button id="start" class="btn btn-primary">Start</button>
+      <button id="stop" class="btn btn-secondary">Stop</button>
+      <button id="helpBtn" class="btn btn-secondary" title="What does this do?">Help</button>
+      <button id="signalBtn" class="btn btn-secondary" title="Get Signal private messenger">Download Signal</button>
+    </div>
+    <div class="row">
+      <label for="offset" title="To continue where you left off, enter how many chats were already processed">Offset</label>
+      <input id="offset" type="number" value="0" title="To continue where you have left estimate how many chats have been already processed" />
+      <span id="offsetView"></span>
+    </div>
+    <div class="row">
+      <label for="speed" title="Eg. 0.1 for fast and 2 for slow script">Speed</label>
+      <input id="speed" type="number" step="0.1" min="0.1" value="1" title="Eg. 0.1 for fast and 2 for slow script" />
+    </div>
+    <div class="row">
+      <label title="Choose whether to enable or disable the setting">Mode</label>
+      <button id="modeToggle" class="btn btn-secondary" type="button" title="Toggle mode">Enable</button>
+    </div>
+    <div id="status" style="overflow-wrap:anywhere">idle</div>
+    <div class="footer">Vibe coded with ChatGPT-5 by Sowlcat</div>
+    <div id="helpBackdrop" class="modal-backdrop" aria-hidden="true"></div>
+    <div id="helpModal" class="modal-card" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div id="helpTitle" class="modal-title">How this works</div>
+      <div class="modal-body">
+        <p><strong>Open a chat before starting the script.</strong></p>
+        <p>This tool automates WhatsApp Web to open each chat, navigate to the contact’s profile, open <em>Advanced chat privacy</em>, and ensure the privacy switch is turned on. It then moves to the next chat.</p>
+        <ul>
+          <li><strong>Speed</strong>: lower values are faster (e.g., 0.1), higher values are slower (e.g., 2).</li>
+          <li><strong>Offset</strong>: skip a number of chats to resume where you left off.</li>
+        </ul>
+        <p>Keep the WhatsApp Web tab active while it runs.</p>
+      </div>
+      <div class="modal-actions">
+        <button id="helpClose" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
