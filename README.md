@@ -3,7 +3,7 @@
 This repository hosts the public privacy policy for the Chrome extension "WAP – WhatsApp Privacy Toggler".
 
 ### Quick links
-- Policy file: [`PRIVACY.md`](./PRIVACY.md)
+- Policy file: [`PRIVACY.md`](docs/PRIVACY.md)
 - Contact: [ale.vir.mail@gmail.com](mailto:ale.vir.mail@gmail.com)
 
 ### About the extension
